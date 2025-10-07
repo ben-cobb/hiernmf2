@@ -154,6 +154,8 @@ function [tree, splits, is_leaf, clusters, timings, Ws, priorities] = hiernmf_ev
 			min_priority = 1e308;
 			split_subset = 1:n;
 		else
+			% is_leaf
+
 			% Find all current leaf nodes
 			leaves = find(is_leaf == 1);
 			
@@ -258,6 +260,8 @@ function [subset, W_buffer_one, H_buffer_one, priority_one] = trial_split(trial_
 		H_buffer_one = zeros(2, length(subset));
 		priority_one = -2;
 	end
+
+	priority_one = 1;
 end
 
 %--------------------------------------
