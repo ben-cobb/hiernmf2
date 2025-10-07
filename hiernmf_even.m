@@ -191,10 +191,13 @@ function [tree, splits, is_leaf, clusters, timings, Ws, priorities] = hiernmf_ev
 		result_used = result_used + 2;
 		% NOTE: here going to enforce that the clusters are even partitioned...
 		% [max_val, cluster_subset] = max(H);
-		
+		H_sub = H(1, :) - H(2, :);
+		med = median(H_sub);
 
-		clusters{new_nodes(1)} = split_subset(find(cluster_subset == 1));
-		clusters{new_nodes(2)} = split_subset(find(cluster_subset == 2));
+		clusters{new_nodes(1)} = split_subset(find(H_sub >= med));
+		%split_subset(find(cluster_subset == 1));
+		clusters{new_nodes(2)} = split_subset(find(H_sub < med));  
+		%split_subset(find(cluster_subset == 2));
 		Ws{new_nodes(1)} = W(:, 1);
 		Ws{new_nodes(2)} = W(:, 2);
 		splits(i) = split_node;
