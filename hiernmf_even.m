@@ -189,7 +189,10 @@ function [tree, splits, is_leaf, clusters, timings, Ws, priorities] = hiernmf_ev
 		end
 
 		result_used = result_used + 2;
-		[max_val, cluster_subset] = max(H);
+		% NOTE: here going to enforce that the clusters are even partitioned...
+		% [max_val, cluster_subset] = max(H);
+		
+
 		clusters{new_nodes(1)} = split_subset(find(cluster_subset == 1));
 		clusters{new_nodes(2)} = split_subset(find(cluster_subset == 2));
 		Ws{new_nodes(1)} = W(:, 1);
@@ -281,6 +284,7 @@ function [cluster_subset, W_buffer_one, H_buffer_one, priority_one] = actual_spl
 		H = rand(2, length(subset));
 		[W, H] = nmfsh_comb_rank2(X_subset, W, H, params);
 		[max_val, cluster_subset] = max(H);
+		% cluster_subset
 		W_buffer_one = zeros(m, 2);
 		W_buffer_one(term_subset, :) = W;
 		H_buffer_one = H;
