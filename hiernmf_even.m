@@ -1,4 +1,4 @@
-function [tree, splits, is_leaf, clusters, timings, Ws, priorities] = hier8_neat(X, k, params)
+function [tree, splits, is_leaf, clusters, timings, Ws, priorities] = hiernmf_even(X, k, params)
 %%HIER8_NEAT - Hierarchical clustering based on rank-2 NMF
 % [tree, splits, is_leaf, clusters, timings, Ws, priorities] = hier8_neat(X, k, params)
 %
@@ -148,21 +148,36 @@ function [tree, splits, is_leaf, clusters, timings, Ws, priorities] = hier8_neat
 		timings(i) = toc(t0);
 
 		if i == 1
+			% First split: always split the root (node 0)
 			split_node = 0;
 			new_nodes = [1 2];
 			min_priority = 1e308;
 			split_subset = 1:n;
 		else
+			% Find all current leaf nodes
 			leaves = find(is_leaf == 1);
+			
+			% Get priority scores for all leaf nodes
 			temp_priority = priorities(leaves);
+			
+			% Find minimum positive priority (for outlier detection)
 			min_priority = min(temp_priority(temp_priority > 0));
-			[max_priority, split_node] = max(temp_priority);
+			
+			% Find the leaf with MAXIMUM priority score
+			[max_priority, split_node] = max(temp_priority);  % <- SELECTION HAPPENS HERE
+			
 			if max_priority < 0
 				fprintf('Cannot generate all %d leaf clusters\n', k);
 				return;
 			end
+			
+			% Convert back to actual node index
 			split_node = leaves(split_node);
+			
+			% Mark this node as no longer a leaf (it will be split)
 			is_leaf(split_node) = 0;
+			
+			% Get the stored W and H matrices for this node
 			W = W_buffer{split_node};
 			H = H_buffer{split_node};
 			split_subset = clusters{split_node};
@@ -180,6 +195,7 @@ function [tree, splits, is_leaf, clusters, timings, Ws, priorities] = hier8_neat
 		splits(i) = split_node;
 		is_leaf(new_nodes) = 1;
 
+		% For the first child node
 		subset = clusters{new_nodes(1)};
 		[subset, W_buffer_one, H_buffer_one, priority_one] = trial_split(trial_allowance, unbalanced, min_priority, X, subset, W(:, 1), params);
 		clusters{new_nodes(1)} = subset;
@@ -187,6 +203,7 @@ function [tree, splits, is_leaf, clusters, timings, Ws, priorities] = hier8_neat
 		H_buffer{new_nodes(1)} = H_buffer_one;
 		priorities(new_nodes(1)) = priority_one;
 
+		% For the second child node  
 		subset = clusters{new_nodes(2)};
 		[subset, W_buffer_one, H_buffer_one, priority_one] = trial_split(trial_allowance, unbalanced, min_priority, X, subset, W(:, 2), params);
 		clusters{new_nodes(2)} = subset;
