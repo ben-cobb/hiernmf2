@@ -263,8 +263,11 @@ function [cluster_subset, W_buffer_one, H_buffer_one, priority_one] = actual_spl
 		W_buffer_one = zeros(m, 2);
 		W_buffer_one(term_subset, :) = W;
 		H_buffer_one = H;
+
+		% fprintf('size(X_subset) = [%d, %d]\n', size(X_subset));
+		num_elements = size(X_subset, 2);
 		if length(unique(cluster_subset)) > 1
-			priority_one = compute_priority(W_parent, W_buffer_one);
+			priority_one = compute_priority(W_parent, W_buffer_one) * num_elements;
 		else
 			priority_one = -1;
 		end
@@ -298,7 +301,11 @@ function priority = compute_priority(W_parent, W_child)
 		discount(discount == 0) = log(2);
 		weight = weight ./ discount;
 		weight_part = weight_part ./ discount;
-		priority = NDCG_part(idx_parent, idx_child1, weight, weight_part) * NDCG_part(idx_parent, idx_child2, weight, weight_part);
+
+		% fprintf('n = %d, length(W_child(:,1)) = %d, length(W_child(:,2)) = %d\n', n, length(W_child(:,1)), length(W_child(:,2)));
+		% fprintf('size(W_parent) = [%d, %d]\n', size(W_parent));
+
+		priority = NDCG_part(idx_parent, idx_child1, weight, weight_part) * NDCG_part(idx_parent, idx_child2, weight, weight_part) * n;
 	end
 end
 
